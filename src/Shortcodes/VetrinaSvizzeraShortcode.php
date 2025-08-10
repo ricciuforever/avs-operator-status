@@ -131,7 +131,7 @@ class VetrinaSvizzeraShortcode {
             <?php foreach ( $random_generi_svizzeri as $genere_data ) : ?>
                 <?php if ( isset( $genere_data['is_promo'] ) && $genere_data['is_promo'] ) : ?>
                     <div>
-                        <div class="uk-card uk-card-primary uk-card-body uk-text-center uk-flex uk-flex-column uk-padding-small cartomante">
+                        <div class="uk-card uk-card-primary uk-card-body uk-text-center uk-flex uk-flex-column uk-padding-small operatrice">
                             <div class="uk-card-media-top uk-margin-bottom">
                                 <img class="uk-border-circle" src="/wp-content/uploads/2025/07/ricarica-carta-credito-svizzera.jpg" alt="Ricarica con Carta di Credito Svizzera" style="width: 500px; object-fit: cover;">
                             </div>
@@ -159,7 +159,7 @@ class VetrinaSvizzeraShortcode {
                     <?php continue; ?>
                 <?php endif; ?>
                 <div>
-                    <div class="uk-card uk-card-secondary uk-card-body uk-text-center uk-flex uk-flex-column uk-padding-small cartomante" data-codice="<?php echo esc_attr( $genere_data['operatrice_id'] ); ?>">
+                    <div class="uk-card uk-card-secondary uk-card-body uk-text-center uk-flex uk-flex-column uk-padding-small operatrice" data-codice="<?php echo esc_attr( $genere_data['operatrice_id'] ); ?>">
                         <div class="uk-card-media-top">
                             <img class="uk-border-circle" src="<?php echo esc_url( $genere_data['image_url'] ); ?>" alt="Operatrice per <?php echo esc_attr( $genere_data['name'] ); ?>">
                         </div>

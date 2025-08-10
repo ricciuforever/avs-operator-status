@@ -69,26 +69,26 @@ jQuery(document).ready(function($) {
         // Views
         const visibleOperators = [];
         // --- CORREZIONE: Aggiunto selettore per le pagine archivio .tax-genere ---
-        $('.aos-operators-grid .cartomante, .tax-genere .cartomante').each(function() {
+        $('.aos-operators-grid .operatrice, .tax-genere .operatrice').each(function() {
             const postId = $(this).data('codice');
             if (postId) visibleOperators.push(postId);
         });
         if (visibleOperators.length > 0) {
             $.post(aos_frontend_params.ajax_url, { action: 'aos_track_views', nonce: aos_frontend_params.nonce, codes: visibleOperators });
         }
-        
+
         // Clicks contatore legacy
         // --- CORREZIONE: Modificato l'event handler per essere più robusto e includere .tax-genere ---
         // Usiamo $(document).on() per una maggiore compatibilità con contenuti caricati dinamicamente (AJAX)
         $(document).on('click', '.aos-operators-grid .aos-track-click, .tax-genere .aos-track-click', function() {
             // Troviamo la card genitore più vicina per assicurarci di prendere il codice corretto
-            const card = $(this).closest('.cartomante');
+            const card = $(this).closest('.operatrice');
             const postId = card.data('codice');
             if (postId) {
                 $.post(aos_frontend_params.ajax_url, { action: 'aos_track_click', nonce: aos_frontend_params.nonce, code: postId });
             }
         });
-        
+
         // Click tracking globale (questa funzione era già corretta e globale)
         $(document).on('click', 'a', function() {
             const href = $(this).attr('href');
@@ -97,8 +97,8 @@ jQuery(document).ready(function($) {
             const numerazioneId = aos_frontend_params.mappa_numeri[numeroPulito];
             let postId = 0;
             const contextUrl = window.location.href;
-            const card = $(this).closest('.cartomante');
-            if (card.length > 0 && card.data('codice')) { postId = card.data('codice'); } 
+            const card = $(this).closest('.operatrice');
+            if (card.length > 0 && card.data('codice')) { postId = card.data('codice'); }
             else if (aos_frontend_params.is_operatrice_page && aos_frontend_params.post_id) { postId = aos_frontend_params.post_id; }
             $.post(aos_frontend_params.ajax_url, { action: 'aos_log_global_click', nonce: aos_frontend_params.nonce, numerazione_id: numerazioneId, post_id: postId, context_url: contextUrl });
         });
@@ -121,7 +121,7 @@ jQuery(document).ready(function($) {
 
         clearButton.show();
         favoritesContainer.html('<div class="uk-width-1-1"><div uk-spinner="ratio: 2"></div></div>');
-        
+
         $.ajax({
             url: aos_frontend_params.ajax_url, method: 'POST',
             data: { action: 'aos_get_favorite_cards_html', nonce: aos_frontend_params.nonce, operator_ids: favoriteIds }
@@ -129,7 +129,7 @@ jQuery(document).ready(function($) {
             if (response.success && response.data) {
                 favoritesContainer.html(response.data);
                 // Dopo aver caricato le nuove card, inizializza le loro funzionalità
-                window.initializeAllFeatures(); 
+                window.initializeAllFeatures();
             } else {
                 favoritesContainer.html('<div class="uk-width-1-1"><p>Si è verificato un errore nel caricare i tuoi preferiti.</p></div>');
             }
@@ -149,7 +149,7 @@ jQuery(document).ready(function($) {
         const currentFavorites = getFavoritesFromCookie();
         const hasFavorites = currentFavorites.length > 0;
 
-        $('.cartomante').each(function() {
+        $('.operatrice').each(function() {
             const card = $(this);
             if (card.data('aos-processed')) return; // Evita di processare la stessa card più volte
 
@@ -166,13 +166,13 @@ jQuery(document).ready(function($) {
             if (hasFavorites) {
                 favoriteContainer.append('<a href="/le-mie-preferite/" class="aos-view-favorites-link">Visualizza preferite</a>');
             }
-            card.prepend(favoriteContainer);
+            card.find('.uk-position-relative').first().append(favoriteContainer);
 
             // Trova tutti i link all'interno della card e applica le altre logiche
             card.find('a[href*="tel:"], a[href*="ddi="]').each(function() {
                 const link = $(this);
                 const buttonWrapper = link.closest('.uk-button');
-                
+
                 const href = link.attr('href');
                 const numeroPulito = getCleanNumber(href);
                 if (numeroPulito === '') return;
@@ -199,7 +199,7 @@ jQuery(document).ready(function($) {
                    const currencySymbol = href.includes('+41') ? 'CHF' : '€';
                    const buttonStyle = buttonWrapper.hasClass('uk-button-primary') ? 'uk-button-primary' : (buttonWrapper.hasClass('uk-button-secondary') ? 'uk-button-secondary' : 'uk-button-default');
                    const tariffButton = $('<button type="button" class="uk-button ' + buttonStyle + '"> ' + currencySymbol + ' </button>');
-                   
+
                    const mostraColonnaScatto = tariffe.some(t => parseFloat(t.scatto) > 0);
                    let tableHtml = '<table class="uk-table uk-table-striped uk-table-small uk-text-center"><thead><tr><th>Gestore</th>' + (mostraColonnaScatto ? '<th>Scatto</th>' : '') + '<th>Costo/min</th></tr></thead><tbody>';
                    const tutteTariffeUguali = tariffe.every((t, i, arr) => i === 0 || (t.scatto === arr[0].scatto && t.importo === arr[0].importo));
@@ -219,7 +219,7 @@ jQuery(document).ready(function($) {
 
                    const dropdownContent = $('<div />', { 'uk-dropdown': 'mode: click; pos: bottom-right' }).addClass('uk-card uk-card-body uk-card-default uk-padding-small').css('width', 'auto').html(tableHtml);
                    const tariffToggleContainer = $('<div />').append(tariffButton).append(dropdownContent);
-                   
+
                    buttonWrapper.addClass('uk-width-expand uk-text-center').wrap('<div class="uk-button-group uk-width-1-1"></div>').after(tariffToggleContainer);
                 }
             });
@@ -239,7 +239,7 @@ jQuery(document).ready(function($) {
             } else {
                 card.append(infoButtonContainer);
             }
-            
+
             card.data('aos-processed', true);
         });
     }; // Fine di window.initializeAllFeatures
@@ -254,7 +254,7 @@ jQuery(document).ready(function($) {
         e.stopPropagation();
 
         const heartIcon = $(this);
-        const card = heartIcon.closest('.cartomante');
+        const card = heartIcon.closest('.operatrice');
         const operatorId = parseInt(card.data('codice'), 10);
         if (!operatorId) return;
 

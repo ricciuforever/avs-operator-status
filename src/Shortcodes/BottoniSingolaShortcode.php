@@ -61,7 +61,7 @@ class BottoniSingolaShortcode {
 
         ob_start();
         ?>
-        <div class="cartomante" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
+        <div class="operatrice" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
             <?php
             if ( ! empty( $numerazioni_filtrate ) ) {
                 usort( $numerazioni_filtrate, function( $a, $b ) {

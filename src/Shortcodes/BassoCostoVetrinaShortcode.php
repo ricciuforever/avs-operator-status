@@ -89,7 +89,7 @@ class BassoCostoVetrinaShortcode {
                 $operatrice_content = apply_filters( 'the_content', $operatrice->post_content );
                 ?>
                 <div>
-                    <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center cartomante" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
+                    <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center operatrice" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
                         <?php if ( has_post_thumbnail( $operatrice->ID ) ) : ?>
                             <img class="uk-border-circle" src="<?php echo get_the_post_thumbnail_url( $operatrice->ID, 'medium_large' ); ?>" alt="<?php echo esc_attr( $operatrice->post_title ); ?>">
                         <?php endif; ?>
