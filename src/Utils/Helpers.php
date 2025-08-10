@@ -211,14 +211,16 @@ class Helpers {
         // The original function had a large block for this.
 
         ?>
-        <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center cartomante" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
+        <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center cartomante uk-position-relative" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
             <div class="uk-flex-1">
-                <?php
-                if ( has_post_thumbnail( $post_id ) ) :
-                    $alt_text = esc_attr( $operatrice_post->post_title ) . ' - Telefono erotico ' . esc_attr( $genere_nome );
-                    echo get_the_post_thumbnail( $post_id, 'medium', [ 'class' => 'uk-border-circle', 'alt' => $alt_text ] );
-                endif;
-                ?>
+                <div class="uk-position-relative">
+                    <?php
+                    if ( has_post_thumbnail( $post_id ) ) :
+                        $alt_text = esc_attr( $operatrice_post->post_title ) . ' - Telefono erotico ' . esc_attr( $genere_nome );
+                        echo get_the_post_thumbnail( $post_id, 'medium', [ 'class' => 'uk-border-circle', 'alt' => $alt_text ] );
+                    endif;
+                    ?>
+                </div>
                 <div class="labelnome"><?php echo esc_html( $operatrice_post->post_title ); ?></div>
                 <div class="uk-h3 uk-margin-remove-top uk-text-primary uk-margin-small-bottom">Genere: <?php echo esc_html( $genere_nome ); ?></div>
                 <div class="uk-text-small cartintro"><?php echo wp_kses_post( wp_trim_words( $operatrice_post->post_content, 20, '...' ) ); ?></div>
