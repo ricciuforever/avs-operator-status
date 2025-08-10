@@ -137,7 +137,11 @@
 }
 
 /* Layout adjustments for operator card */
-.cartomante .uk-position-relative {
+.operatrice {
+    padding-bottom: 50px !important; /* Add space for the absolute positioned button */
+}
+
+.operatrice .uk-position-relative {
     display: inline-block; /* Ensure the container wraps the image */
 }
 
@@ -158,7 +162,7 @@
     transition: opacity 0.3s ease;
 }
 
-.cartomante .uk-position-relative:hover .aos-favorite-container {
+.operatrice .uk-position-relative:hover .aos-favorite-container {
     opacity: 1;
 }
 
@@ -189,7 +193,7 @@
 
 .aos-unblock-info-container {
     position: absolute;
-    bottom: 10px;
+    bottom: 15px;
     right: 10px;
     z-index: 10;
 }

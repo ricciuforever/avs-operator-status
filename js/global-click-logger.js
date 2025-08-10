@@ -20,27 +20,27 @@ jQuery(document).ready(function($) {
         if (numeroPulito === '' || !aos_global_params.numeri.hasOwnProperty(numeroPulito)) {
             return;
         }
-        
+
         const numerazioneId = aos_global_params.numeri[numeroPulito];
         let postId = 0;
         let contextUrl = '';
 
         // --- NUOVA LOGICA PER CAPIRE IL CONTESTO ---
-        
+
         // 1. Il click è avvenuto dentro una card di uno shortcode?
-        const card = link.closest('.cartomante');
+        const card = link.closest('.operatrice');
         if (card.length > 0 && card.data('codice')) {
             postId = card.data('codice');
-        } 
+        }
         // 2. Altrimenti, siamo in una pagina di una singola operatrice?
         else if (aos_global_params.is_operatrice_page && aos_global_params.post_id) {
             postId = aos_global_params.post_id;
-        } 
+        }
         // 3. Altrimenti, è un click generico. Salviamo l'URL della pagina.
         else {
             contextUrl = window.location.href;
         }
-        
+
         // Invia i dati al backend
         $.post(aos_global_params.ajax_url, {
             action: 'aos_log_global_click',

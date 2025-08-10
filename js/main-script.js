@@ -24,7 +24,7 @@ jQuery(document).ready(function($) {
             const link = $(this);
             const href = link.attr('href');
             if (!href || link.data('labels-applied')) return;
-            
+
             let numeroPulito = '';
             if (href.includes('r=pr_cc/CCrecharge4')) {
                 const ddiMatch = href.match(/ddi=([0-9\.]+)/);
@@ -74,14 +74,14 @@ jQuery(document).ready(function($) {
                 const name = numerazioneData.name || '';
                 let currencySymbol = name.includes('+41') ? 'CHF' : '€';
                 let buttonStyle = 'uk-button-default';
-                if (link.hasClass('uk-button-primary')) { buttonStyle = 'uk-button-primary'; } 
+                if (link.hasClass('uk-button-primary')) { buttonStyle = 'uk-button-primary'; }
                 else if (link.hasClass('uk-button-secondary')) { buttonStyle = 'uk-button-secondary'; }
-                
+
                 const tariffButton = $('<button type="button" class="uk-button ' + buttonStyle + '"> ' + currencySymbol + ' </button>');
                 const mostraRigaUnica = ((numerazioneData.description || '').toLowerCase().includes('carta di credito') || (numerazioneData.description || '').toLowerCase().includes('ricarica online') || (numerazioneData.description || '').toLowerCase().includes('svizzera') || (numerazioneData.name || '').trim().startsWith('+41'));
                 let sonoTutteUguali = false;
                 if (tariffe.length > 1) { sonoTutteUguali = tariffe.every(t => t.scatto === tariffe[0].scatto && t.importo === tariffe[0].importo); }
-                
+
                 let tableHtml = '<table class="uk-table uk-table-striped uk-table-small uk-text-center"><thead><tr><th>Operatore</th><th>Scatto</th><th>Costo/min</th></tr></thead><tbody>';
                 if (mostraRigaUnica || tariffe.length === 1 || sonoTutteUguali) {
                     let s = parseFloat(tariffe[0].scatto).toFixed(2); let i = parseFloat(tariffe[0].importo).toFixed(2);
@@ -105,7 +105,7 @@ jQuery(document).ready(function($) {
     // --- LOGICA TRACKING DUALE ---
     function trackViews() {
         const visibleOperators = [];
-        $('.aos-operators-grid .cartomante').each(function() {
+        $('.aos-operators-grid .operatrice').each(function() {
             const postId = $(this).data('codice');
             if (postId) { visibleOperators.push(postId); }
         });
@@ -136,8 +136,8 @@ jQuery(document).ready(function($) {
         if (numeroPulito === '' || !aos_params.mappa_numeri || !aos_params.mappa_numeri.hasOwnProperty(numeroPulito)) return;
         const numerazioneId = aos_params.mappa_numeri[numeroPulito];
         let postId = 0; let contextUrl = '';
-        const card = $(this).closest('.cartomante');
-        if (card.length > 0 && card.data('codice')) { postId = card.data('codice'); } 
+        const card = $(this).closest('.operatrice');
+        if (card.length > 0 && card.data('codice')) { postId = card.data('codice'); }
         else if (aos_params.is_operatrice_page && aos_params.post_id) { postId = aos_params.post_id; }
         else { contextUrl = window.location.href; }
         $.post(aos_params.ajax_url, { action: 'aos_log_global_click', nonce: aos_params.nonce, numerazione_id: numerazioneId, post_id: postId, context_url: contextUrl });

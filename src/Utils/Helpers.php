@@ -211,7 +211,7 @@ class Helpers {
         // The original function had a large block for this.
 
         ?>
-        <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center cartomante uk-position-relative" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
+        <div class="uk-card uk-padding-small uk-card-secondary uk-card-body uk-flex uk-flex-column uk-text-center operatrice uk-position-relative" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>">
             <div class="uk-flex-1">
                 <div class="uk-position-relative">
                     <?php
