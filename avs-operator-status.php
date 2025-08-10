@@ -11,8 +11,7 @@ if ( ! defined( 'ABSPATH' ) ) exit;
 
 register_activation_hook( __FILE__, 'aos_plugin_activate' );
 
-// Includi il file delle funzioni personalizzate
-require_once plugin_dir_path( __FILE__ ) . 'includes/functions.php';
+// Legacy includes are being removed. Functionality will be moved to autoloaded classes.
 
 
 function aos_plugin_activate() {
@@ -77,19 +76,50 @@ class AOS_Schema_Manager {
 // Avvia il gestore.
 AOS_Schema_Manager::init();
 
-// Carica i file con la logica del plugin
-require_once plugin_dir_path(__FILE__) . 'includes/post-types.php';
-require_once plugin_dir_path(__FILE__) . 'includes/tax-meta-fields.php';
-require_once plugin_dir_path(__FILE__) . 'includes/helpers.php';
-require_once plugin_dir_path(__FILE__) . 'includes/backend.php';
-require_once plugin_dir_path(__FILE__) . 'includes/frontend.php';
-require_once plugin_dir_path(__FILE__) . 'includes/shortcodes.php';
-require_once plugin_dir_path(__FILE__) . 'includes/admin-statistics-page.php';
-//require_once plugin_dir_path(__FILE__) . 'includes/admin-sync-page.php';
-require_once plugin_dir_path(__FILE__) . 'includes/quiz-logic.php';
-// Include le funzioni per l'audio
-require_once plugin_dir_path( __FILE__ ) . 'includes/audio.php';
+// All includes are now handled by the PSR-4 autoloader.
+
+// Define plugin constants
+define( 'AOS_VERSION', '7.0' );
+define( 'AOS_PLUGIN_FILE', __FILE__ );
+define( 'AOS_PLUGIN_PATH', plugin_dir_path( AOS_PLUGIN_FILE ) );
+define( 'AOS_PLUGIN_URL', plugin_dir_url( AOS_PLUGIN_FILE ) );
+
+/**
+ * PSR-4 Autoloader.
+ *
+ * Automatically loads classes from the `src` directory.
+ *
+ * @param string $class The fully-qualified class name.
+ */
+spl_autoload_register( function ( $class ) {
+    $prefix = 'AvsOperatorStatus\\';
+    $base_dir = __DIR__ . '/src/';
+
+    $len = strlen( $prefix );
+    if ( strncmp( $prefix, $class, $len ) !== 0 ) {
+        return;
+    }
+
+    $relative_class = substr( $class, $len );
+    $file = $base_dir . str_replace( '\\', '/', $relative_class ) . '.php';
+
+    if ( file_exists( $file ) ) {
+        require $file;
+    }
+} );
+
+
+/**
+ * Begins execution of the plugin.
+ *
+ * @since 7.0
+ */
+function avs_operator_status_run() {
+	AvsOperatorStatus\Plugin::instance();
+}
+add_action( 'plugins_loaded', 'avs_operator_status_run' );
+
 
 // 3. Avvia le funzionalità di backend e frontend
 // Le funzioni che aggiungono gli 'add_action' sono ora nei rispettivi file.
-aos_frontend_setup();
+// aos_frontend_setup(); // TODO: This will be removed later.
