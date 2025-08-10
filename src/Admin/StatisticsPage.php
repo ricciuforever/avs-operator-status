@@ -78,23 +78,66 @@ class StatisticsPage {
 
         $selected_date_start = $_GET['filter_date_start'] ?? $first_available_date;
         $selected_date_end = $_GET['filter_date_end'] ?? $today;
+        $selected_operatrice = isset($_GET['filter_operatrice']) ? intval($_GET['filter_operatrice']) : 0;
+        $selected_genere = isset($_GET['filter_genere']) ? intval($_GET['filter_genere']) : 0;
+        $selected_numerazione = isset($_GET['filter_numerazione']) ? intval($_GET['filter_numerazione']) : 0;
 
         $query_date_start = $selected_date_start . ' 00:00:00';
         $query_date_end = $selected_date_end . ' 23:59:59';
 
         $clicked_term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT numerazione_term_id FROM {$table_name} WHERE numerazione_term_id > 0 AND click_timestamp BETWEEN %s AND %s", $query_date_start, $query_date_end ) );
 
+        $detailed_clicks_data = $this->get_detailed_click_data($query_date_start, $query_date_end);
+
+        $all_operatrici = get_posts(['post_type' => 'operatrice', 'numberposts' => -1, 'orderby' => 'title', 'order' => 'ASC']);
+        $all_generi = get_terms(['taxonomy' => 'genere', 'hide_empty' => false, 'orderby' => 'name']);
+        $all_numerazioni = get_terms(['taxonomy' => 'numerazione', 'hide_empty' => false, 'orderby' => 'name']);
+
         $this->stats_data = [
             'selected_date_start' => $selected_date_start,
             'selected_date_end' => $selected_date_end,
+            'selected_operatrice' => $selected_operatrice,
+            'selected_genere' => $selected_genere,
+            'selected_numerazione' => $selected_numerazione,
             'first_available_date' => $first_available_date,
             'top_operatrici' => $this->get_top_operatrici($query_date_start, $query_date_end),
             'top_generi' => $this->get_top_generi($query_date_start, $query_date_end),
             'numerazioni_chart_data' => $this->get_numerazioni_chart_data($query_date_start, $query_date_end),
             'operatrici_chart_data' => $this->get_operatrici_chart_data($query_date_start, $query_date_end),
             'generi_chart_data' => $this->get_generi_chart_data($query_date_start, $query_date_end),
-            'filterable_terms' => !empty($clicked_term_ids) ? get_terms(['taxonomy' => 'numerazione', 'include' => $clicked_term_ids, 'hide_empty' => false, 'orderby' => 'name']) : [],
+            'all_operatrici' => $all_operatrici,
+            'all_generi' => $all_generi,
+            'all_numerazioni' => $all_numerazioni,
+            'detailed_clicks' => $detailed_clicks_data['items'],
+            'total_clicks' => $detailed_clicks_data['total_count'],
+            'pagination' => $detailed_clicks_data['pagination_html'],
+            'sortable_links' => $this->get_sortable_links(),
         ];
+    }
+
+    private function get_sortable_links(): array {
+        $links = [];
+        $current_orderby = $_GET['orderby'] ?? 'click_timestamp';
+        $current_order = $_GET['order'] ?? 'desc';
+        $columns = [
+            'click_timestamp' => 'Data e Ora',
+            'operatrice_name' => 'Operatrice',
+            'genere_name' => 'Genere',
+            'numerazione_name' => 'Numerazione',
+            'click_context' => 'Contesto'
+        ];
+
+        foreach ($columns as $orderby => $label) {
+            $order = ($current_orderby === $orderby && $current_order === 'asc') ? 'desc' : 'asc';
+            $url = add_query_arg(['orderby' => $orderby, 'order' => $order]);
+            $class = 'sortable';
+            if ($current_orderby === $orderby) {
+                $class .= ' sorted ' . $current_order;
+            }
+            $links[$orderby] = sprintf('<a href="%s" class="%s"><span>%s</span><span class="sorting-indicator"></span></a>', esc_url($url), esc_attr($class), esc_html($label));
+        }
+
+        return $links;
     }
 
     /**
@@ -184,5 +227,88 @@ class StatisticsPage {
             ];
         }
         return ['labels' => $labels, 'datasets' => $chart_data];
+    }
+
+    private function get_detailed_click_data(string $start_date, string $end_date): array {
+        global $wpdb;
+        $table_name = $wpdb->prefix . 'aos_click_tracking';
+
+        $current_page = max(1, $_GET['paged'] ?? 1);
+        $per_page = 20;
+        $offset = ($current_page - 1) * $per_page;
+
+        // Sorting
+        $orderby = $_GET['orderby'] ?? 'click_timestamp';
+        $order = $_GET['order'] ?? 'DESC';
+        $sortable_columns = ['click_timestamp', 'operatrice_name', 'genere_name', 'numerazione_name', 'click_context'];
+        if (!in_array($orderby, $sortable_columns)) {
+            $orderby = 'click_timestamp';
+        }
+        if (!in_array(strtoupper($order), ['ASC', 'DESC'])) {
+            $order = 'DESC';
+        }
+
+        // Filtering
+        $where_clauses = [];
+        $params = [$start_date, $end_date];
+        $where_clauses[] = "c.click_timestamp BETWEEN %s AND %s";
+
+        if (!empty($_GET['filter_operatrice'])) {
+            $where_clauses[] = "c.post_id = %d";
+            $params[] = intval($_GET['filter_operatrice']);
+        }
+        if (!empty($_GET['filter_numerazione'])) {
+            $where_clauses[] = "c.numerazione_term_id = %d";
+            $params[] = intval($_GET['filter_numerazione']);
+        }
+        if (!empty($_GET['filter_genere'])) {
+            $where_clauses[] = "c.post_id IN (SELECT object_id FROM {$wpdb->term_relationships} WHERE term_taxonomy_id IN (SELECT term_taxonomy_id FROM {$wpdb->term_taxonomy} WHERE term_id = %d))";
+            $params[] = intval($_GET['filter_genere']);
+        }
+
+        $where_sql = "WHERE " . implode(" AND ", $where_clauses);
+
+        $total_query = $wpdb->prepare("SELECT COUNT(c.id) FROM {$table_name} c {$where_sql}", $params);
+        $total_count = $wpdb->get_var($total_query);
+
+        $query_sql = "SELECT
+                c.click_timestamp,
+                c.click_context,
+                p.post_title AS operatrice_name,
+                num_term.name AS numerazione_name,
+                (SELECT GROUP_CONCAT(t.name SEPARATOR ', ')
+                 FROM {$wpdb->term_relationships} tr
+                 JOIN {$wpdb->term_taxonomy} tt ON tr.term_taxonomy_id = tt.term_taxonomy_id
+                 JOIN {$wpdb->terms} t ON tt.term_id = t.term_id
+                 WHERE tt.taxonomy = 'genere' AND tr.object_id = c.post_id
+                ) AS genere_name
+            FROM {$table_name} AS c
+            LEFT JOIN {$wpdb->posts} AS p ON c.post_id = p.ID
+            LEFT JOIN {$wpdb->terms} AS num_term ON c.numerazione_term_id = num_term.term_id
+            {$where_sql}
+            ORDER BY {$orderby} {$order}
+            LIMIT %d OFFSET %d";
+
+        $params[] = $per_page;
+        $params[] = $offset;
+
+        $items = $wpdb->get_results($wpdb->prepare($query_sql, $params));
+
+        $total_pages = ceil($total_count / $per_page);
+        $pagination_html = '';
+        if ($total_pages > 1) {
+            $pagination_html = paginate_links([
+                'base' => add_query_arg('paged', '%#%'),
+                'format' => '',
+                'current' => $current_page,
+                'total' => $total_pages,
+            ]);
+        }
+
+        return [
+            'items' => $items,
+            'total_count' => $total_count,
+            'pagination_html' => $pagination_html,
+        ];
     }
 }
