@@ -143,7 +143,7 @@ class Helpers {
             $tariffe = get_term_meta( $numerazione->term_id, '_aos_tariffe_meta', true );
             $prima_tariffa = ! empty( $tariffe ) ? $tariffe[0] : null;
             ?>
-            <a href="<?php echo esc_url( $href ); ?>" class="uk-tile-muted uk-padding-small uk-link-reset uk-text-center uk-border-rounded aos-track-click" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>" title="Chiama con Carta di Credito: <?php echo esc_attr( $number ); ?>">
+            <a href="<?php echo esc_url( $href ); ?>" class="uk-tile-muted uk-display-block uk-padding-small uk-link-reset uk-text-center uk-border-rounded aos-track-click" data-codice="<?php echo esc_attr( $codice_da_tracciare ); ?>" title="Chiama con Carta di Credito: <?php echo esc_attr( $number ); ?>">
                 <div class="uk-text-bold">Chiama e Ricarica</div>
                 <?php if ( $prima_tariffa && isset( $prima_tariffa['importo'] ) ): ?>
                     <div class="uk-text-primary uk-text-small uk-margin-small-top">Tariffa unica: <?php echo esc_html( number_format_i18n( $prima_tariffa['importo'], 2 ) ); ?>€ / min</div>
