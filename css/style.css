@@ -1,0 +1,137 @@
+/* Stili per il nuovo banner di ricarica */
+.aos-ricarica-banner {
+    display: block;
+    padding: 15px;
+    border: 1px dashed #1e87f0; /* Bordo tratteggiato con colore primario */
+    border-radius: 5px;
+    background: #f8f8f8;
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 10px; /* Spazio sotto il banner */
+}
+
+.aos-ricarica-banner:hover {
+    border-color: #0f4577;
+    background: #f0f0f0;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.aos-ricarica-banner .uk-text-bold {
+    color: #333;
+    font-size: 1.1em;
+}
+
+.aos-ricarica-banner .uk-text-small {
+    color: #666;
+}
+
+.aos-payment-icons img {
+    height: 24px;
+    width: auto;
+    margin: 0 5px;
+    opacity: 0.8;
+}
+
+/* Stili per il nuovo banner Carta di Credito */
+.aos-carta-banner {
+    display: block;
+    padding: 15px;
+    border: 1px solid #e5e5e5; /* Bordo grigio chiaro, stile default */
+    border-radius: 5px;
+    background: #ffffff; /* Sfondo bianco */
+    transition: all 0.2s ease-in-out;
+    margin-bottom: 10px;
+}
+
+.aos-carta-banner:hover {
+    border-color: #d4d4d4;
+    background: #f9f9f9;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+}
+
+.aos-carta-banner .uk-text-bold {
+    color: #333;
+    font-size: 1.1em;
+}
+
+.aos-carta-banner .uk-text-meta {
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #333;
+}
+
+/* Rende le icone di pagamento coerenti tra i due banner */
+.aos-carta-banner .aos-payment-icons img {
+    height: 24px;
+    width: auto;
+    margin: 0 5px;
+    opacity: 0.8;
+}
+
+/* Stile per il contenitore del player audio dell'operatrice */
+.operator-audio-player {
+    margin: 20px 0;
+    padding: 15px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+    border: 1px solid #e3e3e3;
+}
+
+/* Stile per il testo introduttivo */
+.operator-audio-player .audio-intro {
+    margin: 0 0 10px 0;
+    font-weight: bold;
+    color: #555;
+    text-align: center;
+    font-style: italic;
+}
+
+/* Stile per il player audio stesso */
+.operator-audio-player audio {
+    width: 100%; /* Occupa tutta la larghezza del contenitore */
+    display: block;
+}
+
+/* Stile per il box di contatto WhatsApp */
+.whatsapp-contact-box {
+    margin-top: 15px;
+    padding: 15px;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    background-color: #f9f9f9;
+}
+
+.whatsapp-contact-box p {
+    margin-top: 0;
+    margin-bottom: 10px;
+    text-align: center;
+    font-weight: 500;
+}
+
+.whatsapp-form {
+    display: flex;
+    gap: 10px;
+}
+
+.whatsapp-user-number {
+    flex-grow: 1;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+.send-whatsapp-btn {
+    padding: 10px 15px;
+    background-color: #25D366; /* Colore di WhatsApp */
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    transition: background-color 0.3s;
+}
+
+.send-whatsapp-btn:hover {
+    background-color: #128C7E;
+}
