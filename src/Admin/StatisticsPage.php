@@ -8,11 +8,43 @@ namespace AvsOperatorStatus\Admin;
  * Handles the creation and rendering of the click statistics admin page.
  */
 class StatisticsPage {
+    private ?array $stats_data = null;
+
     /**
      * Registers all hooks for the statistics page.
      */
     public function register() {
         add_action( 'admin_menu', [ $this, 'add_statistics_page' ] );
+        add_action( 'admin_enqueue_scripts', [ $this, 'enqueue_assets' ] );
+    }
+
+    /**
+     * Enqueues scripts and styles for the statistics page.
+     *
+     * @param string $hook The current admin page hook.
+     */
+    public function enqueue_assets( string $hook ) {
+        if ( 'operatrice_page_aos-click-statistics' !== $hook ) {
+            return;
+        }
+
+        $this->load_stats_data();
+
+        wp_enqueue_script( 'chart-js', 'https://cdn.jsdelivr.net/npm/chart.js', [], '3.7.0', true );
+        wp_enqueue_script(
+            'aos-admin-statistics',
+            AOS_PLUGIN_URL . 'js/admin-statistics.js',
+            [ 'chart-js', 'wp-i18n' ],
+            AOS_VERSION,
+            true
+        );
+
+        $chart_data = [
+            'operatrici' => $this->stats_data['operatrici_chart_data'],
+            'generi' => $this->stats_data['generi_chart_data'],
+            'numerazioni' => $this->stats_data['numerazioni_chart_data'],
+        ];
+        wp_localize_script('aos-admin-statistics', 'aosStatisticsData', $chart_data);
     }
 
     /**
@@ -30,52 +62,48 @@ class StatisticsPage {
     }
 
     /**
-     * Renders the HTML and handles the logic for the statistics page.
+     * Loads all the necessary data for the statistics page.
      */
-    public function render_page() {
+    private function load_stats_data() {
+        if ($this->stats_data !== null) {
+            return;
+        }
+
         global $wpdb;
         $table_name = $wpdb->prefix . 'aos_click_tracking';
 
-        // --- Filter Handling ---
         $today = date('Y-m-d');
         $first_click_date_db = $wpdb->get_var("SELECT MIN(click_timestamp) FROM {$table_name}");
         $first_available_date = $first_click_date_db ? date('Y-m-d', strtotime($first_click_date_db)) : $today;
 
         $selected_date_start = $_GET['filter_date_start'] ?? $first_available_date;
         $selected_date_end = $_GET['filter_date_end'] ?? $today;
-        $selected_numerazione = isset($_GET['filter_numerazione']) ? intval($_GET['filter_numerazione']) : 0;
-        $selected_operatrice_analysis = isset($_GET['filter_operatrice_analysis']) ? intval($_GET['filter_operatrice_analysis']) : 0;
-        $selected_genere_analysis = isset($_GET['filter_genere_analysis']) ? intval($_GET['filter_genere_analysis']) : 0;
-        $selected_numerazione_analysis = isset($_GET['filter_numerazione_analysis']) ? intval($_GET['filter_numerazione_analysis']) : 0;
-        $selected_context_analysis = isset($_GET['filter_context_analysis']) ? urldecode(sanitize_text_field($_GET['filter_context_analysis'])) : '';
 
         $query_date_start = $selected_date_start . ' 00:00:00';
         $query_date_end = $selected_date_end . ' 23:59:59';
 
-        // --- Data Fetching ---
-        $top_operatrici = $this->get_top_operatrici($query_date_start, $query_date_end);
-        $top_generi = $this->get_top_generi($query_date_start, $query_date_end);
-        $numerazioni_chart_data = $this->get_numerazioni_chart_data($query_date_start, $query_date_end);
-        $operatrici_chart_data = $this->get_operatrici_chart_data($query_date_start, $query_date_end);
-        $generi_chart_data = $this->get_generi_chart_data($query_date_start, $query_date_end);
-
-        // --- Dropdown data ---
         $clicked_term_ids = $wpdb->get_col( $wpdb->prepare( "SELECT DISTINCT numerazione_term_id FROM {$table_name} WHERE numerazione_term_id > 0 AND click_timestamp BETWEEN %s AND %s", $query_date_start, $query_date_end ) );
-        $filterable_terms = !empty($clicked_term_ids) ? get_terms(['taxonomy' => 'numerazione', 'include' => $clicked_term_ids, 'hide_empty' => false, 'orderby' => 'name']) : [];
 
-        // ... a lot more data fetching logic from the original file ...
-        // For brevity, the full HTML and JS from the original file should be here.
-        // This is a structural refactoring, so I'm focusing on moving the PHP logic.
+        $this->stats_data = [
+            'selected_date_start' => $selected_date_start,
+            'selected_date_end' => $selected_date_end,
+            'first_available_date' => $first_available_date,
+            'top_operatrici' => $this->get_top_operatrici($query_date_start, $query_date_end),
+            'top_generi' => $this->get_top_generi($query_date_start, $query_date_end),
+            'numerazioni_chart_data' => $this->get_numerazioni_chart_data($query_date_start, $query_date_end),
+            'operatrici_chart_data' => $this->get_operatrici_chart_data($query_date_start, $query_date_end),
+            'generi_chart_data' => $this->get_generi_chart_data($query_date_start, $query_date_end),
+            'filterable_terms' => !empty($clicked_term_ids) ? get_terms(['taxonomy' => 'numerazione', 'include' => $clicked_term_ids, 'hide_empty' => false, 'orderby' => 'name']) : [],
+        ];
+    }
 
-        // The following is a simplified representation of the view.
-        // In a real application, this would be the full HTML from the original file.
-        ?>
-        <div class="wrap">
-            <h1>Statistiche dei Click</h1>
-            <?php // All the forms, tables, charts canvas, JS, and CSS from the original file would be here. ?>
-            <p>Statistics page content, forms, and charts would be rendered here.</p>
-        </div>
-        <?php
+    /**
+     * Renders the HTML for the statistics page.
+     */
+    public function render_page() {
+        $this->load_stats_data();
+        extract($this->stats_data);
+        require_once AOS_PLUGIN_PATH . 'src/Admin/views/statistics-page-view.php';
     }
 
     private function get_top_operatrici(string $start_date, string $end_date): array {
